@@ -1,0 +1,14 @@
+#poolTable {
+    width: 620px;
+    height: 310px;
+    background-color: green;
+    position: relative;
+}
+
+.ball {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+}
