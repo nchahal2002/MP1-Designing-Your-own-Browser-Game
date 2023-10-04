@@ -1,6 +1,7 @@
 const poolTable = document.getElementById('poolTable');
 const balls = [];
 const frictionFactor = 0.98; // Adjust this value to control the friction effect
+const holeRadius = 15; // Radius for the holes
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const stick = {
@@ -21,6 +22,38 @@ function drawStick() {
   ctx.stroke();
 }
 
+function drawTable() {
+  // Clear the canvas and draw table components
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw holes
+  const holePositions = [
+    { x: 0, y: 0 },
+    { x: canvas.width / 2, y: 0 },
+    { x: canvas.width, y: 0 },
+    { x: 0, y: canvas.height },
+    { x: canvas.width / 2, y: canvas.height },
+    { x: canvas.width, y: canvas.height }
+  ];
+
+  ctx.fillStyle = 'black';
+  holePositions.forEach(hole => {
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, holeRadius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Draw Balls
+  balls.forEach(ball => {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Draw stick
+  drawStick();
+}
+
 function handleKeyDown(event) {
   if (event.key === 'a' && stick.angle > -Math.PI / 2) {
     stick.angle -= 0.1;
@@ -28,7 +61,7 @@ function handleKeyDown(event) {
     stick.angle += 0.1;
   } else if(event.key === 'ArrowUp') {
     stick.y -= 5;
-  } else if (event.key === 'ArrowDown') {
+  } else if (event.key === 'ArrowDown' || event.key === 'Down') {
     console.log(stick);
     stick.y += 5;
   } else if (event.key === 'ArrowLeft') {
@@ -63,7 +96,9 @@ function handleKeyDown(event) {
   drawStick();
 }
 
-document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keydown', handleKeyDown, event => {
+  console.log('Key Pressed:', event.key);
+});
 
 
 const ballColors = ['white','red', 'yellow', 'blue', 'purple', 'orange', 'darkgreen', 'black', 'maroon', 'brown', 'magenta', 'cyan'];
@@ -155,6 +190,8 @@ function moveBalls() {
         ball2.y += overlap * sin;
       }
     }
+
+    drawTable();
   }
 
   requestAnimationFrame(moveBalls);
