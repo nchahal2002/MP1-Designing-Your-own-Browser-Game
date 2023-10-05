@@ -1,7 +1,6 @@
 const poolTable = document.getElementById('poolTable');
 const balls = [];
 const frictionFactor = 0.98; // Adjust this value to control the friction effect
-const holeRadius = 15; // Radius for the holes
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const stick = {
@@ -26,23 +25,6 @@ function drawTable() {
   // Clear the canvas and draw table components
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw holes
-  const holePositions = [
-    { x: 0, y: 0 },
-    { x: canvas.width / 2, y: 0 },
-    { x: canvas.width, y: 0 },
-    { x: 0, y: canvas.height },
-    { x: canvas.width / 2, y: canvas.height },
-    { x: canvas.width, y: canvas.height }
-  ];
-
-  ctx.fillStyle = 'black';
-  holePositions.forEach(hole => {
-    ctx.beginPath();
-    ctx.arc(hole.x, hole.y, holeRadius, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
   // Draw Balls
   balls.forEach(ball => {
     ctx.beginPath();
@@ -55,14 +37,13 @@ function drawTable() {
 }
 
 function handleKeyDown(event) {
-  if (event.key === 'a' && stick.angle > -Math.PI / 2) {
+  if (event.key === 'a') {
     stick.angle -= 0.1;
-  } else if (event.key === 's' && stick.angle < Math.PI / 2) {
+  } else if (event.key === 's') {
     stick.angle += 0.1;
-  } else if(event.key === 'ArrowUp') {
+  } else if (event.key === 'ArrowUp') {
     stick.y -= 5;
-  } else if (event.key === 'ArrowDown' || event.key === 'Down') {
-    console.log(stick);
+  } else if (event.key === 'ArrowDown') {
     stick.y += 5;
   } else if (event.key === 'ArrowLeft') {
     stick.x -= 5;
@@ -72,65 +53,21 @@ function handleKeyDown(event) {
 
   // Check for collision with balls
   balls.forEach(ball => {
-    const distance = Math.sqrt((ball.x - stick.x) ** 2 + (ball.y - stick.y) ** 2);
     const dx = ball.x - stick.x;
     const dy = ball.y - stick.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance < ball.radius) {
+    if (distance < ball.radius + 8) { // Adjust the value accordingly
       // Handle collision response here
       // For simplicity, we'll just reverse the direction of the ball
       const angleToBall = Math.atan2(dy, dx);
       const stickForce = 3; // Adjust this value to control the force of impact
-      const newBallVelocity = {
-        dx: Math.cos(angleToBall) * stickForce,
-        dy: Math.sin(angleToBall) * stick
-      };
-
-      // Update ball velocity
-      ball.dx = newBallVelocity.dx;
-      ball.dy = newBallVelocity.dy;
-
+      ball.dx = Math.cos(angleToBall) * stickForce; 
+      ball.dy = Math.sin(angleToBall) * stickForce; // Fix here: change 'stick' to 'stickForce'
     }
   });
 
   drawStick();
-}
-
-document.addEventListener('keydown', handleKeyDown, event => {
-  console.log('Key Pressed:', event.key);
-});
-
-
-const ballColors = ['white','red', 'yellow', 'blue', 'purple', 'orange', 'darkgreen', 'black', 'maroon', 'brown', 'magenta', 'cyan'];
-
-function createBall(x, y, color) {
-  const ball = document.createElement('div');
-  ball.className = 'ball';
-  ball.style.left = x + 'px';
-  ball.style.top = y + 'px';
-  ball.style.backgroundColor = color;
-  poolTable.appendChild(ball);
-  balls.push({ element: ball, x, y, dx: 1, dy: 1, radius: 10 });
-}
-
-// Create balls with different colors
-createBall(50, 50, ballColors[0]);
-createBall(123, 100, ballColors[1]);
-createBall(153, 150, ballColors[2]);
-createBall(239, 200, ballColors[3]);
-createBall(245, 240, ballColors[4])
-createBall(360, 200, ballColors[5])
-createBall(400, 100, ballColors[6])
-createBall(360, 70, ballColors[7])
-createBall(180, 70, ballColors[8])
-createBall(500, 50, ballColors[9])
-createBall(450, 90, ballColors[10])
-// Add more balls as needed
-
-function handleStickBallCollision(ball, stick) {
-  const dx = ball.x - stick.x;
-  const dy = ball.y - stick.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
 }
 
 // This function defines moving balls in the x and y positions
@@ -199,35 +136,36 @@ function moveBalls() {
 
 moveBalls();
 
-// function placeBallsOnTable() {
-//   // Clear any previous ball placements
-//   balls.forEach(ball => {
-//     ball.x = -100; // Move balls off-screen
-//     ball.y = -100;
-//   });
 
-//   // Arrange balls in a triangle formation
-//   const triangleRows = 3; // Number of rows in the triangle
-//   const ballRadius = 20; // Ball radius
 
-//   // Staring position for the first row of the triangle
-//   let startX = poolTable.offsetWidth / 2 - (triangleRows - 1) * ballRadius;
 
-//   let ballIndex = 0;
-//   for(let i = 0; i < triangleRows; i++) {
-//     for (let j = 0; j <= i;  j++) {
-//       const ballColor = ballColors[ballIndex];
-//       balls[ballIndex].x = startX + 2 * j * ballRadius;
-//       balls[ballIndex].y = 100 + 2 * i * ballRadius;
-//       ballIndex++;
-//     }
-//   }
-// }
+document.addEventListener('keydown', handleKeyDown, event => {
+  console.log('Key Pressed:', event.key);
+});
 
-// // Initialize balls 
-// for(let i = 0; i < ballColors.length; i++) {
-//   createBall(0, 0, 10, ballColors[i]);
-// }
 
-// // Call the function to place the balls on the table
-// placeBallsOnTable();
+const ballColors = ['white','red', 'yellow', 'blue', 'purple', 'orange', 'darkgreen', 'black', 'maroon', 'brown', 'magenta', 'cyan'];
+
+function createBall(x, y, color) {
+  const ball = document.createElement('div');
+  ball.className = 'ball';
+  ball.style.left = x + 'px';
+  ball.style.top = y + 'px';
+  ball.style.backgroundColor = color;
+  poolTable.appendChild(ball);
+  balls.push({ element: ball, x, y, dx: 1, dy: 1, radius: 10 });
+}
+
+// Create balls with different colors
+createBall(50, 50, ballColors[0]);
+createBall(123, 100, ballColors[1]);
+createBall(153, 150, ballColors[2]);
+createBall(239, 200, ballColors[3]);
+createBall(245, 240, ballColors[4])
+createBall(360, 200, ballColors[5])
+createBall(400, 100, ballColors[6])
+createBall(360, 70, ballColors[7])
+createBall(180, 70, ballColors[8])
+createBall(500, 50, ballColors[9])
+createBall(450, 90, ballColors[10])
+// Add more balls as needed
