@@ -4,15 +4,38 @@ const frictionFactor = 0.98; // Adjust this value to control the friction effect
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const stick = {
-  x: canvas.width / 2,
-  y: canvas.height - 10,
+  x: canvas.width / 2 + (poolTable.offsetWidth - canvas.width) / 2,
+  y: canvas.height / 2 + (poolTable.offsetHeight - canvas.height) / 2,
   length: 100,
   angle: 0
 };
 
+// Adjust canvas dimensions to match the poolTable
+canvas.width = poolTable.offsetWidth;
+canvas.height = poolTable.offsetHeight;
+
+// Function to create a hole
+function createHole(x, y) {
+  const hole = document.createElement('div');
+  hole.className = 'hole';
+  hole.style.left = x + 'px';
+  hole.style.top = y + 'px';
+  poolTable.appendChild(hole);
+}
+
+// Create holes
+createHole(0, 0);  // Adjust positions accordingly
+createHole(590, 0);
+createHole(0, 280);
+createHole(590, 280);
+createHole(295, 0);
+createHole(295, 280);
+
 function drawStick() {
+  // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Draw the stick
   ctx.beginPath();
   ctx.moveTo(stick.x, stick.y);
   const endX = stick.x + stick.length * Math.cos(stick.angle);
@@ -20,6 +43,7 @@ function drawStick() {
   ctx.lineTo(endX, endY);
   ctx.stroke();
 }
+
 
 function drawTable() {
   // Clear the canvas and draw table components
@@ -70,11 +94,56 @@ function handleKeyDown(event) {
   drawStick();
 }
 
+let score = 0;
+
+function updateScore() {
+  score++;
+  const scoreElement = document.getElementById('score');
+  scoreElement.innerText = `Score: ${score}`;
+}
+
+function checkHoleCollision(ball) {
+  const holes = document.getElementsByClassName('hole');
+
+  for (let i = 0; i < holes.length; i++) {
+    const hole = holes[i];
+    const holeRect = hole.getBoundingClientRect();
+
+    if (
+      ball.x > holeRect.left &&
+      ball.x < holeRect.right &&
+      ball.y > holeRect.top &&
+      ball.y < holeRect.bottom
+    ) {
+      // Remove the ball from the array
+      balls.splice(balls.indexOf(ball), 1);
+
+      // Update the score
+      updateScore();
+
+      // Remove the ball element from the DOM
+      ball.element.remove();
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
 // This function defines moving balls in the x and y positions
 function moveBalls() {
   balls.forEach(ball => {
     ball.x += ball.dx;
     ball.y += ball.dy;
+
+    // Check if the ball is in a hole
+    if (checkHoleCollision(ball)) {
+      // update the score here
+      updateScore();
+      return; // Skip further movement for this ball
+    }
 
     // Apply friction to slow down the ball
     ball.dx *= frictionFactor;
@@ -160,8 +229,8 @@ function createBall(x, y, color) {
 createBall(50, 50, ballColors[0]);
 createBall(123, 100, ballColors[1]);
 createBall(153, 150, ballColors[2]);
-createBall(239, 200, ballColors[3]);
-createBall(245, 240, ballColors[4])
+createBall(239, 110, ballColors[3]);
+createBall(245, 140, ballColors[4])
 createBall(360, 200, ballColors[5])
 createBall(400, 100, ballColors[6])
 createBall(360, 70, ballColors[7])
