@@ -115,17 +115,19 @@ function checkHoleCollision(ball) {
       ball.y > holeRect.top &&
       ball.y < holeRect.bottom
     ) {
-      // Remove the ball from the array
-      balls.splice(balls.indexOf(ball), 1);
+      if (hole.style.backgroundColor === 'black') {
+        // Increase the score
+        updateScore();
 
-      // Update the score
-      updateScore();
+        // Remove the ball from the array
+        balls.splice(balls.indexOf(ball), 1);
 
-      // Remove the ball element from the DOM
-      ball.element.remove();
+        // Remove the ball element from the DOM
+        ball.element.remove();
 
-      return true;
-    }
+        return true;
+      }
+    }  
   }
 
   return false;
@@ -213,7 +215,32 @@ document.addEventListener('keydown', handleKeyDown, event => {
 });
 
 
-const ballColors = ['white','red', 'yellow', 'blue', 'purple', 'orange', 'darkgreen', 'black', 'maroon', 'brown', 'magenta', 'cyan'];
+const ballColors = ['white', 'red', 'yellow', 'blue', 'purple', 'orange', 'darkgreen', 'black', 'maroon', 'brown', 'magenta'];
+
+// Initialize an array to store ball positions
+let ballPositions = [];
+
+// Function to store ball positions in local storage
+function saveBallPositions() {
+  localStorage.setItem('ballPositions', JSON.stringify(ballPositions));
+}
+
+// Function to retrieve ball positions from local storage
+function loadBallPositions() {
+  const savedPositions = localStorage.getItem('ballPositions');
+  if (savedPositions) {
+    ballPositions = JSON.parse(savedPositions);
+    balls.forEach((ball, index) => {
+      ball.x = ballPositions[index].x;
+      ball.y = ballPositions[index].y;
+      ball.element.style.left = ball.x + 'px';
+      ball.element.style.left = ball.y + 'px';
+    });
+  }
+}
+
+// Call the function to load ball positions
+loadBallPositions();
 
 function createBall(x, y, color) {
   const ball = document.createElement('div');
@@ -223,18 +250,26 @@ function createBall(x, y, color) {
   ball.style.backgroundColor = color;
   poolTable.appendChild(ball);
   balls.push({ element: ball, x, y, dx: 1, dy: 1, radius: 10 });
+
+  // Arrange balls in a triangle formation
+  const triangleBase = 5 * ball.radius; // Adjust as needed for desired triangle size
+  const xOffset = balls.length % 3 * triangleBase; // Offset based on the number of balls already created
+
+  if (xOffset < 2 * triangleBase) {
+    ball.style.left = (200 + xOffset) + 'px'; // Adjust the initial position of the triangle
+    ball.style.top = (200 + (xOfsset / 2) - (3 * triangleBase)) + 'px';
+  }
 }
 
-// Create balls with different colors
-createBall(50, 50, ballColors[0]);
-createBall(123, 100, ballColors[1]);
-createBall(153, 150, ballColors[2]);
-createBall(239, 110, ballColors[3]);
-createBall(245, 140, ballColors[4])
-createBall(360, 200, ballColors[5])
-createBall(400, 100, ballColors[6])
-createBall(360, 70, ballColors[7])
-createBall(180, 70, ballColors[8])
-createBall(500, 50, ballColors[9])
-createBall(450, 90, ballColors[10])
-// Add more balls as needed
+// Create balls with different colors in a triangle formation
+createBall(185, 95, ballColors[0]);   // White
+createBall(315, 95, ballColors[1]);  // Red
+createBall(340, 80, ballColors[2]);  // Yellow
+createBall(340, 110, ballColors[3]);  // Blue
+createBall(365, 95, ballColors[4]);  // Purple
+createBall(365, 65, ballColors[5]);   // Orange
+createBall(365, 125, ballColors[6]);  // Dark Green
+createBall(390, 110, ballColors[7]);  // Black
+createBall(390, 50, ballColors[8]);   // Maroon
+createBall(390, 140, ballColors[9]);  // Brown
+createBall(390, 80, ballColors[10]); // Magenta
